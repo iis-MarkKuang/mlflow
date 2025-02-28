@@ -972,6 +972,8 @@ message CreateRun {
   // Additional metadata for run.
   repeated RunTag tags = 9;
 
+  optional string run_id = 11;
+
   message Response {
     // The newly created run.
     optional Run run = 1;

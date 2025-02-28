@@ -216,6 +216,7 @@ class RestStore(AbstractStore):
                 start_time=start_time,
                 tags=tag_protos,
                 run_name=run_name,
+                run_id=run_id
             )
         )
         response_proto = self._call_endpoint(CreateRun, req_body)

@@ -773,6 +773,7 @@ def _create_run():
             "experiment_id": [_assert_string],
             "start_time": [_assert_intlike],
             "run_name": [_assert_string],
+            "run_id": [_assert_string],
         },
     )
 
@@ -783,6 +784,7 @@ def _create_run():
         start_time=request_message.start_time,
         tags=tags,
         run_name=request_message.run_name,
+        run_id=request_message.run_id
     )
 
     response_message = CreateRun.Response()
