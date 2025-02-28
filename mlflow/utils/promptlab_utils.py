@@ -39,8 +39,9 @@ def _create_promptlab_run_impl(
     mlflow_version: str,
     user_id: str,
     start_time: str,
+    run_id: str,
 ):
-    run = store.create_run(experiment_id, user_id, start_time, tags, run_name)
+    run = store.create_run(experiment_id, user_id, start_time, tags, run_name, run_id)
     run_id = run.info.run_id
 
     try:

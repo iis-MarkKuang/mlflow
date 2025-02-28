@@ -1418,6 +1418,7 @@ def create_promptlab_run_handler():
     experiment_id = args.get("experiment_id")
     assert_arg_exists("experiment_id", experiment_id)
     run_name = args.get("run_name", None)
+    run_id = args.get("run_id", None)
     tags = args.get("tags", [])
     prompt_template = args.get("prompt_template")
     assert_arg_exists("prompt_template", prompt_template)
@@ -1463,6 +1464,7 @@ def create_promptlab_run_handler():
         mlflow_version=mlflow_version,
         user_id=user_id,
         start_time=start_time,
+        run_id=run_id
     )
     response_message = CreateRun.Response()
     response_message.run.MergeFrom(run.to_proto())
