@@ -636,7 +636,7 @@ class FileStore(AbstractStore):
         self._overwrite_run_info(new_info)
         return new_info
 
-    def create_run(self, experiment_id, user_id, start_time, tags, run_name):
+    def create_run(self, experiment_id, user_id, start_time, tags, run_name, run_id):
         """
         Creates a run with the specified attributes.
         """
@@ -664,7 +664,7 @@ class FileStore(AbstractStore):
         run_name = run_name or run_name_tag or _generate_random_name()
         if not run_name_tag:
             tags.append(RunTag(key=MLFLOW_RUN_NAME, value=run_name))
-        run_uuid = uuid.uuid4().hex
+        run_uuid = run_id if run_id else uuid.uuid4().hex
         artifact_uri = self._get_artifact_dir(experiment_id, run_uuid)
         run_info = RunInfo(
             run_uuid=run_uuid,

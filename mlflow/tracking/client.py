@@ -349,6 +349,7 @@ class MlflowClient:
         start_time: Optional[int] = None,
         tags: Optional[dict[str, Any]] = None,
         run_name: Optional[str] = None,
+        run_id: Optional[str] = None
     ) -> Run:
         """
         Create a :py:class:`mlflow.entities.Run` object that can be associated with
@@ -363,6 +364,7 @@ class MlflowClient:
             tags: A dictionary of key-value pairs that are converted into
                 :py:class:`mlflow.entities.RunTag` objects.
             run_name: The name of this run.
+            run_id: specified run_id(in case of model/exp/run migration between instances and run tracing), in UUID4 format.
 
         Returns:
             :py:class:`mlflow.entities.Run` that was created.
@@ -397,7 +399,7 @@ class MlflowClient:
             lifecycle_stage: active
             status: RUNNING
         """
-        return self._tracking_client.create_run(experiment_id, start_time, tags, run_name)
+        return self._tracking_client.create_run(experiment_id, start_time, tags, run_name, run_id)
 
     def _upload_trace_data(self, trace_info: TraceInfo, trace_data: TraceData) -> None:
         return self._tracking_client._upload_trace_data(trace_info, trace_data)

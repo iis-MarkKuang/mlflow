@@ -141,7 +141,7 @@ class TrackingServiceClient:
             token = paged_history.token
         return history
 
-    def create_run(self, experiment_id, start_time=None, tags=None, run_name=None):
+    def create_run(self, experiment_id, start_time=None, tags=None, run_name=None, run_id=None):
         """Create a :py:class:`mlflow.entities.Run` object that can be associated with
         metrics, parameters, artifacts, etc.
         Unlike :py:func:`mlflow.projects.run`, creates objects but does not run code.
@@ -154,6 +154,7 @@ class TrackingServiceClient:
             tags: A dictionary of key-value pairs that are converted into
                 :py:class:`mlflow.entities.RunTag` objects.
             run_name: The name of this run.
+            run_id: specified run_id(in case of model/exp/run migration between instances and run tracing), in UUID4 format.
 
         Returns:
             :py:class:`mlflow.entities.Run` that was created.
@@ -173,6 +174,7 @@ class TrackingServiceClient:
             start_time=start_time or get_current_time_millis(),
             tags=[RunTag(key, value) for (key, value) in tags.items()],
             run_name=run_name,
+            run_id=run_id
         )
 
     def start_trace(

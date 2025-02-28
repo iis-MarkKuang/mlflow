@@ -196,7 +196,7 @@ class AbstractStore:
         """
 
     @abstractmethod
-    def create_run(self, experiment_id, user_id, start_time, tags, run_name):
+    def create_run(self, experiment_id, user_id, start_time, tags, run_name, run_id):
         """
         Create a run under the specified experiment ID, setting the run's status to "RUNNING"
         and the start time to the current time.
@@ -207,6 +207,8 @@ class AbstractStore:
             start_time: Start time of the run.
             tags: A dictionary of string keys and string values.
             run_name: Name of the run.
+            run_id: specified run_id(in case of model/exp/run migration between instances and run tracing), in UUID4 format.
+
 
         Returns:
             The created Run object

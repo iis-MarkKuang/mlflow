@@ -474,7 +474,7 @@ class SqlAlchemyStore(AbstractStore):
             experiment.last_update_time = get_current_time_millis()
             session.add(experiment)
 
-    def create_run(self, experiment_id, user_id, start_time, tags, run_name):
+    def create_run(self, experiment_id, user_id, start_time, tags, run_name, run_id):
         with self.ManagedSessionMaker() as session:
             experiment = self.get_experiment(experiment_id)
             self._check_experiment_is_active(experiment)
