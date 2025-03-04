@@ -483,7 +483,7 @@ class SqlAlchemyStore(AbstractStore):
             # case letters, because some query filters contain "IN" clause, and in MYSQL the
             # "IN" clause is case-insensitive, we use a trick that filters out comparison values
             # containing upper case letters when parsing "IN" clause inside query filter.
-            run_id = uuid.uuid4().hex
+            run_id = run_id if run_id else uuid.uuid4().hex
             artifact_location = append_to_uri_path(
                 experiment.artifact_location,
                 run_id,
