@@ -121,21 +121,38 @@ class TrackingServiceClient:
         _validate_run_id(run_id)
         return self.store.get_run(run_id)
 
-    def get_metric_history(self, run_id, key):
+    def get_metric_history(self, run_id, key, as_iterator=False):
         """Return a list of metric objects corresponding to all values logged for a given metric.
 
         Args:
             run_id: Unique identifier for run.
             key: Metric name within the run.
+            as_iterator: If True, return a PagedIterator that lazily fetches pages of results
+                instead of loading all results into memory at once.
 
         Returns:
-            A list of :py:class:`mlflow.entities.Metric` entities if logged, else empty list.
+            If as_iterator is False (default), a list of :py:class:`mlflow.entities.Metric`
+            entities if logged, else empty list. If as_iterator is True, a PagedIterator
+            that yields :py:class:`mlflow.entities.Metric` entities.
         """
+        # Import here to avoid circular imports
+        from mlflow.store.entities.paged_list import PagedIterator
 
         # NB: Paginated query support is currently only available for the RestStore backend.
         # FileStore and SQLAlchemy store do not provide support for paginated queries and will
         # raise an MlflowException if the `page_token` argument is not None when calling this
         # API for a continuation query.
+        if as_iterator:
+            def fetch_page(token):
+                return self.store.get_metric_history(
+                    run_id=run_id,
+                    metric_key=key,
+                    max_results=GET_METRIC_HISTORY_MAX_RESULTS,
+                    page_token=token,
+                )
+            return PagedIterator(fetch_page)
+
+        # Original behavior: fetch all pages and return as a list
         history = self.store.get_metric_history(
             run_id=run_id,
             metric_key=key,

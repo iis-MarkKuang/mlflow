@@ -142,6 +142,111 @@ def test_log_batch_with_numpy_array(tracking_client_log_batch):
     assert run_data.tags == expected_tags
 
 
+def test_get_metric_history_backward_compatibility(mock_store):
+    """Test that get_metric_history still behaves the same way by default (backward compatibility)."""
+    from mlflow.store.entities.paged_list import PagedList
+
+    client = newTrackingServiceClient()
+
+    # Mock responses for paginated metric history
+    metrics_page_1 = [
+        Metric(key="test_metric", value=1.0, timestamp=12345, step=0),
+        Metric(key="test_metric", value=2.0, timestamp=12346, step=1),
+    ]
+    metrics_page_2 = [
+        Metric(key="test_metric", value=3.0, timestamp=12347, step=2),
+    ]
+
+    # Mock store responses
+    mock_store.get_metric_history.side_effect = [
+        PagedList(metrics_page_1, "token1"),
+        PagedList(metrics_page_2, None),
+    ]
+
+    # Call get_metric_history with default as_iterator=False
+    result = client.get_metric_history(run_id="test_run_id", key="test_metric")
+
+    # Should return all metrics in a single list
+    assert isinstance(result, list)
+    assert len(result) == 3
+    assert result == metrics_page_1 + metrics_page_2
+    assert mock_store.get_metric_history.call_count == 2
+
+
+def test_get_metric_history_with_as_iterator(mock_store):
+    """Test get_metric_history with as_iterator=True."""
+    from mlflow.store.entities.paged_list import PagedList, PagedIterator
+
+    client = newTrackingServiceClient()
+
+    metrics_page_1 = [
+        Metric(key="test_metric", value=1.0, timestamp=12345, step=0),
+        Metric(key="test_metric", value=2.0, timestamp=12346, step=1),
+    ]
+    metrics_page_2 = [
+        Metric(key="test_metric", value=3.0, timestamp=12347, step=2),
+    ]
+
+    mock_store.get_metric_history.side_effect = [
+        PagedList(metrics_page_1, "token1"),
+        PagedList(metrics_page_2, None),
+    ]
+
+    # Call get_metric_history with as_iterator=True
+    result = client.get_metric_history(
+        run_id="test_run_id", key="test_metric", as_iterator=True
+    )
+
+    assert isinstance(result, PagedIterator)
+
+    # Iterate over the results
+    collected = list(result)
+    assert len(collected) == 3
+    assert collected == metrics_page_1 + metrics_page_2
+    assert mock_store.get_metric_history.call_count == 2
+
+
+def test_get_metric_history_as_iterator_lazy_loading(mock_store):
+    """Test that as_iterator=True loads pages lazily, not upfront."""
+    from mlflow.store.entities.paged_list import PagedList
+
+    client = newTrackingServiceClient()
+
+    metrics_page_1 = [
+        Metric(key="test_metric", value=1.0, timestamp=12345, step=0),
+    ]
+    metrics_page_2 = [
+        Metric(key="test_metric", value=2.0, timestamp=12346, step=1),
+    ]
+
+    mock_store.get_metric_history.side_effect = [
+        PagedList(metrics_page_1, "token1"),
+        PagedList(metrics_page_2, None),
+    ]
+
+    # Get iterator
+    iterator = client.get_metric_history(
+        run_id="test_run_id", key="test_metric", as_iterator=True
+    )
+
+    # Before iteration, store should not have been called yet
+    assert mock_store.get_metric_history.call_count == 0
+
+    # Get first item - first page should be fetched
+    first_item = next(iterator)
+    assert first_item == metrics_page_1[0]
+    assert mock_store.get_metric_history.call_count == 1
+
+    # Get second item - second page should be fetched
+    second_item = next(iterator)
+    assert second_item == metrics_page_2[0]
+    assert mock_store.get_metric_history.call_count == 2
+
+    # Should raise StopIteration when done
+    with pytest.raises(StopIteration):
+        next(iterator)
+
+
 def test_link_traces_to_run_validation():
     client = newTrackingServiceClient()
 
