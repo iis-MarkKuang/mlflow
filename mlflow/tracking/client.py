@@ -475,15 +475,19 @@ class MlflowClient:
             return None
         return self._tracking_client.get_run(parent_run_id)
 
-    def get_metric_history(self, run_id: str, key: str) -> list[Metric]:
+    def get_metric_history(self, run_id: str, key: str, as_iterator: bool = False):
         """Return a list of metric objects corresponding to all values logged for a given metric.
 
         Args:
             run_id: Unique identifier for run.
             key: Metric name within the run.
+            as_iterator: If True, return a PagedIterator that lazily fetches pages of results
+                instead of loading all results into memory at once.
 
         Returns:
-            A list of :py:class:`mlflow.entities.Metric` entities if logged, else empty list.
+            If as_iterator is False (default), a list of :py:class:`mlflow.entities.Metric`
+            entities if logged, else empty list. If as_iterator is True, a PagedIterator
+            that yields :py:class:`mlflow.entities.Metric` entities.
 
         .. code-block:: python
             :caption: Example
@@ -543,7 +547,7 @@ class MlflowClient:
             timestamp: 1603423788610
             --
         """
-        return self._tracking_client.get_metric_history(run_id, key)
+        return self._tracking_client.get_metric_history(run_id, key, as_iterator=as_iterator)
 
     def create_run(
         self,
